@@ -56,4 +56,26 @@ public class DishUseCase implements IDishService {
 
         dishPersistencePort.save(dish);
     }
+
+    @Override
+    public void updateDish(Long dishId, Integer price, String description) {
+        Dish existingDish = dishPersistencePort.findById(dishId)
+                .orElseThrow(DishNotFoundException::new);
+
+        if (price == null || price < ValidationConstants.MIN_PRICE) {
+            throw new InvalidDishPriceException();
+        }
+
+        if (description == null || description.isBlank()) {
+            throw new InvalidDishDescriptionException();
+        }
+
+        existingDish.setPrice(price);
+        existingDish.setDescription(description);
+
+        dishPersistencePort.save(existingDish);
+    }
 }
+
+
+

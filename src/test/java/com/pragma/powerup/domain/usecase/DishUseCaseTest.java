@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -155,4 +157,88 @@ class DishUseCaseTest {
 
         verify(dishPersistencePort, never()).save(any());
     }
+
+    @Test
+    void updateDish_success() {
+
+        Dish existingDish = createValidDish();
+        existingDish.setId(1L);
+
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+        when(dishPersistencePort.save(any(Dish.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+
+        dishUseCase.updateDish(1L, 30000, "Descripción actualizada");
+
+
+        assertEquals(30000, existingDish.getPrice());
+        assertEquals("Descripción actualizada", existingDish.getDescription());
+        verify(dishPersistencePort, times(1)).save(existingDish);
+    }
+        @Test
+        void updateDish_dishNotFound_shouldThrowDishNotFoundException() {
+            when(dishPersistencePort.findById(1L)).thenReturn(Optional.empty());
+
+            assertThrows(DishNotFoundException.class,
+                    () -> dishUseCase.updateDish(1L, 20000, "Nueva desc"));
+
+            verify(dishPersistencePort, never()).save(any());
+        }
+
+    @Test
+    void updateDish_nullPrice_shouldThrowInvalidDishPriceException() {
+        Dish existingDish = createValidDish();
+        existingDish.setId(1L);
+
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+
+        assertThrows(InvalidDishPriceException.class,
+                () -> dishUseCase.updateDish(1L, null, "Nueva descripcion"));
+
+        verify(dishPersistencePort, never()).save(any());
+    }
+    @Test
+    void updateDish_invalidPrice_shouldThrowInvalidDishPriceException() {
+        Dish existingDish = createValidDish();
+        existingDish.setId(1L);
+
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+
+        assertThrows(InvalidDishPriceException.class,
+                () -> dishUseCase.updateDish(1L, 0, "Nueva desc"));
+
+        verify(dishPersistencePort, never()).save(any());
+    }
+
+
+    @Test
+    void updateDish_nullDescription_shouldThrowInvalidDishDescriptionException() {
+        Dish existingDish = createValidDish();
+        existingDish.setId(1L);
+
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+
+        assertThrows(InvalidDishDescriptionException.class,
+                () -> dishUseCase.updateDish(1L, 20000, null));
+
+        verify(dishPersistencePort, never()).save(any());
+    }
+    @Test
+    void updateDish_blankDescription_shouldThrowInvalidDishDescriptionException() {
+        Dish existingDish = createValidDish();
+        existingDish.setId(1L);
+
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+
+        assertThrows(InvalidDishDescriptionException.class,
+                () -> dishUseCase.updateDish(1L, 20000, "    "));
+
+        verify(dishPersistencePort, never()).save(any());
+    }
+
+
 }
+
+
+
+

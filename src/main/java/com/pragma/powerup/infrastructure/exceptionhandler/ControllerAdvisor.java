@@ -28,5 +28,26 @@ public class ControllerAdvisor {
         );
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(DishNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleDishNotFound(DishNotFoundException ex) {
+        ExceptionResponse response = new ExceptionResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.toString()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({
+            InvalidDishPriceException.class,
+            InvalidDishDescriptionException.class
+    })
+    public ResponseEntity<ExceptionResponse> handleDishBadRequest(RuntimeException ex) {
+        ExceptionResponse response = new ExceptionResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.toString()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
     
 }

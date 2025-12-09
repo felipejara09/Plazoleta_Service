@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.DishRequestDto;
+import com.pragma.powerup.application.dto.request.DishUpdateRequestDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
 import com.pragma.powerup.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -40,6 +38,13 @@ public class DishRestController {
     public ResponseEntity<Void> createDish(@Validated @RequestBody DishRequestDto dishRequestDto) {
         dishHandler.createDish(dishRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/dishes/update/{id}")
+    public ResponseEntity<Void> updateDish(@PathVariable Long id,
+                                           @Validated @RequestBody DishUpdateRequestDto dishUpdateRequestDto) {
+        dishHandler.updateDish(id, dishUpdateRequestDto);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
