@@ -6,4 +6,5 @@ import java.util.List;
 public interface IRestaurantPersistencePort {
     Restaurant save(Restaurant restaurant);
     boolean existsByNitId(String nit);
+    boolean existsById(Long id);
 }
