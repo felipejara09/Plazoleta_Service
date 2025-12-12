@@ -12,16 +12,19 @@ import javax.validation.constraints.NotNull;
 @Setter
 public class RestaurantRequestDto {
 
-    @NotBlank
+    @NotBlank(message = "Restaurant name is required")
     private String name;
-    @NotBlank
+
+    @NotBlank(message = "NIT is required")
     private String nitId;
-    @NotBlank
+
+    @NotBlank(message = "Address is required")
     private String address;
-    @NotBlank
+
+    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
-    @NotBlank
+
+    @NotBlank(message = "Logo URL is required")
     private String logoUrl;
-    @NotNull
-    private Long ownerId;
+
 }

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,6 +35,8 @@ public class RestaurantRestController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas",
                     content = @Content)
     })
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/restaurants")
     @ResponseStatus(HttpStatus.CREATED)
     public RestaurantResponseDto createRestaurant(@Valid @RequestBody RestaurantRequestDto dto) {

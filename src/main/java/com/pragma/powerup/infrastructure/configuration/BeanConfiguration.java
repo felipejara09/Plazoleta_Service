@@ -7,6 +7,10 @@ import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
 import com.pragma.powerup.domain.usecase.DishUseCase;
 import com.pragma.powerup.domain.usecase.RestaurantUseCase;
+import com.pragma.powerup.domain.validation.DishBusinessValidator;
+import com.pragma.powerup.domain.validation.DishDataValidator;
+import com.pragma.powerup.domain.validation.RestaurantBusinessValidator;
+import com.pragma.powerup.domain.validation.RestaurantDataValidator;
 import com.pragma.powerup.infrastructure.out.jpa.adapter.DishJpaAdapter;
 import com.pragma.powerup.infrastructure.out.jpa.adapter.RestaurantJpaAdapter;
 import com.pragma.powerup.infrastructure.out.jpa.adapter.UserExternalServiceAdapter;
@@ -14,43 +18,88 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IDishEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IDishRepository;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class BeanConfiguration {
 
+
     @Bean
     public IRestaurantPersistencePort restaurantPersistencePort(
-            IRestaurantRepository restaurantRepository,
-            IRestaurantEntityMapper restaurantEntityMapper
+            IRestaurantRepository repository,
+            IRestaurantEntityMapper mapper
     ) {
-        return new RestaurantJpaAdapter(restaurantRepository, restaurantEntityMapper);
+        return new RestaurantJpaAdapter(repository, mapper);
     }
 
     @Bean
-    public IUserExternalServicePort userExternalServicePort(UserExternalServiceAdapter adapter) {
-        return adapter;
+    public RestaurantDataValidator restaurantDataValidator() {
+        return new RestaurantDataValidator();
+    }
+
+    @Bean
+    public RestaurantBusinessValidator restaurantBusinessValidator(
+            IRestaurantPersistencePort restaurantPersistencePort,
+            IUserExternalServicePort userExternalServicePort
+    ) {
+        return new RestaurantBusinessValidator(
+                restaurantPersistencePort,
+                userExternalServicePort
+        );
     }
 
     @Bean
     public IRestaurantService restaurantService(
             IRestaurantPersistencePort restaurantPersistencePort,
-            IUserExternalServicePort userExternalServicePort
+            RestaurantDataValidator dataValidator,
+            RestaurantBusinessValidator businessValidator
     ) {
-        return new RestaurantUseCase(restaurantPersistencePort, userExternalServicePort);
+        return new RestaurantUseCase(
+                restaurantPersistencePort,
+                dataValidator,
+                businessValidator
+        );
     }
 
     @Bean
-    public IDishPersistencePort dishPersistencePort(IDishRepository dishRepository,
-                                                    IDishEntityMapper dishEntityMapper) {
-        return new DishJpaAdapter(dishRepository, dishEntityMapper);
+    public IDishPersistencePort dishPersistencePort(
+            IDishRepository repository,
+            IDishEntityMapper mapper
+    ) {
+        return new DishJpaAdapter(repository, mapper);
     }
 
     @Bean
-    public IDishService dishService(IDishPersistencePort dishPersistencePort,
-                                    IRestaurantPersistencePort restaurantPersistencePort) {
-        return new DishUseCase(dishPersistencePort, restaurantPersistencePort);
+    public DishDataValidator dishDataValidator() {
+        return new DishDataValidator();
+    }
+
+    @Bean
+    public DishBusinessValidator dishBusinessValidator(
+            IRestaurantPersistencePort restaurantPersistencePort
+    ) {
+        return new DishBusinessValidator(restaurantPersistencePort);
+    }
+
+    @Bean
+    public IDishService dishService(
+            IDishPersistencePort dishPersistencePort,
+            DishDataValidator dataValidator,
+            DishBusinessValidator businessValidator
+    ) {
+        return new DishUseCase(
+                dishPersistencePort,
+                dataValidator,
+                businessValidator
+        );
+    }
+
+
+    @Bean
+    public IUserExternalServicePort userExternalServicePort(
+            UserExternalServiceAdapter adapter
+    ) {
+        return adapter;
     }
 }

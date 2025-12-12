@@ -12,13 +12,11 @@ import javax.validation.constraints.NotNull;
 public class DishUpdateRequestDto {
 
 
-    @NotNull
-    private Long ownerId;
-
-    @Min(1)
+    @NotNull(message = "Price is required")
+    @Min(value = 1, message = "Price must be greater than zero")
     private Integer price;
 
-    @NotBlank
+    @NotBlank(message = "Description is required")
     private String description;
 
 }
