@@ -24,6 +24,9 @@ public class RestaurantRequestDto {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
+    @NotBlank(message = "User is not an OWNER")
+    private long ownerId;
+
     @NotBlank(message = "Logo URL is required")
     private String logoUrl;
 
