@@ -42,7 +42,7 @@ public class DishRestController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     @Operation(
-            summary = "ACtualizar plato",
+            summary = "Actualizar plato",
             description = "Permite al propietario de un restaurante Actualizar precio y descripcion del plato."
     )
     @ApiResponses({
@@ -58,5 +58,25 @@ public class DishRestController {
         dishHandler.updateDish(id, dishUpdateRequestDto);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @Operation(
+            summary = "Actualizar estatus de plato",
+            description = "Permite al propietario de un restaurante active y desactive un plato."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Plato actualizado correctamente",
+                    content = @Content(schema = @Schema(implementation = DishResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas",
+                    content = @Content)
+    })
+
+    @PreAuthorize("hasRole('OWNER')")
+    @PatchMapping("/dishes/{dishId}/status")
+    public ResponseEntity<Void> changeDishStatus(@PathVariable Long dishId,
+                                                 @RequestParam Boolean active) {
+        dishHandler.changeDishStatus(dishId, active);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

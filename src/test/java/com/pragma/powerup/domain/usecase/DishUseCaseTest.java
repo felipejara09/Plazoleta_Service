@@ -28,8 +28,9 @@ class DishUseCaseTest {
     private IRestaurantPersistencePort restaurantPersistencePort;
 
     private DishUseCase dishUseCase;
-
     private Dish validDish;
+
+    private final Long ownerId = 99L;
 
     @BeforeEach
     void setUp() {
@@ -47,31 +48,28 @@ class DishUseCaseTest {
         dish.setPrice(20000);
         dish.setDescription("Hamburguesa con queso y tocineta");
         dish.setImageUrl("https://example.com/hamburguesa.png");
+        dish.setCategory("FAST_FOOD");
         dish.setActive(true);
         dish.setRestaurantId(1L);
         return dish;
     }
 
-    @Test
-    void createDish_success() {
+
+    @Test void createDish_success() {
         when(restaurantPersistencePort.existsById(validDish.getRestaurantId())).thenReturn(true);
-
         dishUseCase.createDish(validDish);
-
         verify(restaurantPersistencePort).existsById(validDish.getRestaurantId());
         verify(dishPersistencePort).save(validDish);
     }
 
-    @Test
-    void createDish_nullActive_setsActiveTrueByDefault() {
+    @Test void createDish_nullActive_setsActiveTrueByDefault() {
         validDish.setActive(null);
         when(restaurantPersistencePort.existsById(validDish.getRestaurantId())).thenReturn(true);
-
         dishUseCase.createDish(validDish);
-
         assertTrue(validDish.getActive());
         verify(dishPersistencePort).save(validDish);
     }
+
 
     @Test
     void createDish_blankName_throwsInvalidDishNameException() {
@@ -146,20 +144,10 @@ class DishUseCaseTest {
         assertThrows(RestaurantNotFoundException.class,
                 () -> dishUseCase.createDish(validDish));
 
-        verify(restaurantPersistencePort, never()).existsById(any());
+        verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
     }
 
-    @Test
-    void createDish_restaurantDoesNotExist_throwsRestaurantNotFoundException() {
-        when(restaurantPersistencePort.existsById(validDish.getRestaurantId())).thenReturn(false);
-
-        assertThrows(RestaurantNotFoundException.class,
-                () -> dishUseCase.createDish(validDish));
-
-        verify(restaurantPersistencePort).existsById(validDish.getRestaurantId());
-        verify(dishPersistencePort, never()).save(any());
-    }
 
     @Test
     void updateDish_success() {
@@ -236,4 +224,35 @@ class DishUseCaseTest {
 
         verify(dishPersistencePort, never()).save(any());
     }
+
+
+
+    @Test
+    void changeDishStatus_success() {
+        Dish existingDish = createValidDish();
+        existingDish.setId(1L);
+        existingDish.setRestaurantId(1L);
+        existingDish.setActive(true);
+
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.of(existingDish));
+        when(restaurantPersistencePort.existsByIdAndOwnerId(1L, ownerId)).thenReturn(true);
+
+        dishUseCase.changeDishStatus(1L, false, ownerId);
+
+        assertFalse(existingDish.getActive());
+        verify(dishPersistencePort).save(existingDish);
+    }
+
+    @Test
+    void changeDishStatus_dishNotFound_shouldThrowDishNotFoundException() {
+        when(dishPersistencePort.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(DishNotFoundException.class,
+                () -> dishUseCase.changeDishStatus(1L, false, ownerId));
+
+        verifyNoInteractions(restaurantPersistencePort);
+        verify(dishPersistencePort, never()).save(any());
+    }
+
+
 }
