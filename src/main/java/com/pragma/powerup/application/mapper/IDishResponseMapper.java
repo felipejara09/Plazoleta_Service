@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.mapper;
 
+import com.pragma.powerup.application.dto.response.DishMenuResponseDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
 import com.pragma.powerup.domain.model.Dish;
 import org.mapstruct.Mapper;
@@ -12,4 +13,6 @@ import org.mapstruct.ReportingPolicy;
 public interface IDishResponseMapper {
 
     DishResponseDto toResponse(Dish dish);
+    DishMenuResponseDto toMenuResponse(Dish dish);
+
 }

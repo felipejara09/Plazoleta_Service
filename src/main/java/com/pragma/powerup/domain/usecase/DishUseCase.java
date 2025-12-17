@@ -8,6 +8,8 @@ import com.pragma.powerup.domain.validation.DishBusinessValidator;
 import com.pragma.powerup.domain.validation.DishDataValidator;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 public class DishUseCase implements IDishService {
@@ -45,6 +47,20 @@ public class DishUseCase implements IDishService {
         dish.setActive(active);
         dishPersistencePort.save(dish);
     }
+
+    @Override
+    public List<Dish> listMenu(Long restaurantId, int page, int size, String category) {
+
+        if (restaurantId == null || restaurantId <= 0) {
+            throw new RestaurantNotFoundException(); // o InvalidRestaurantIdException
+        }
+        if (page < 0 || size <= 0) {
+            throw new InvalidPaginationException();
+        }
+
+        return dishPersistencePort.findMenuByRestaurant(restaurantId, page, size, category);
+    }
+
 }
 
 

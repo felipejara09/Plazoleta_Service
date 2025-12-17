@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.request.DishUpdateRequestDto;
+import com.pragma.powerup.application.dto.response.DishMenuResponseDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
 import com.pragma.powerup.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,10 +17,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/v1/owner")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class DishRestController {
 
@@ -36,7 +38,7 @@ public class DishRestController {
                     content = @Content)
     })
     @PreAuthorize("hasRole('OWNER')")
-    @PostMapping("/dishes")
+    @PostMapping("/owner/dishes")
     public ResponseEntity<Void> createDish(@Validated @RequestBody DishRequestDto dishRequestDto) {
         dishHandler.createDish(dishRequestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -52,7 +54,7 @@ public class DishRestController {
                     content = @Content)
     })
     @PreAuthorize("hasRole('OWNER')")
-    @PatchMapping("/dishes/update/{id}")
+    @PatchMapping("/owner/dishes/update/{id}")
     public ResponseEntity<Void> updateDish(@PathVariable Long id,
                                            @Validated @RequestBody DishUpdateRequestDto dishUpdateRequestDto) {
         dishHandler.updateDish(id, dishUpdateRequestDto);
@@ -71,12 +73,25 @@ public class DishRestController {
     })
 
     @PreAuthorize("hasRole('OWNER')")
-    @PatchMapping("/dishes/{dishId}/status")
+    @PatchMapping("owner/dishes/{dishId}/status")
     public ResponseEntity<Void> changeDishStatus(@PathVariable Long dishId,
                                                  @RequestParam Boolean active) {
         dishHandler.changeDishStatus(dishId, active);
         return ResponseEntity.noContent().build();
     }
+
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @GetMapping("client/restaurants/{restaurantId}/dishes")
+    public ResponseEntity<List<DishMenuResponseDto>> listDishesByRestaurant(
+            @PathVariable Long restaurantId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category
+    ) {
+        return ResponseEntity.ok(dishHandler.listMenu(restaurantId, page, size, category));
+    }
+
 
 
 }

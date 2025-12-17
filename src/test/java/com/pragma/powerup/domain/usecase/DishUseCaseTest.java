@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +54,21 @@ class DishUseCaseTest {
         dish.setRestaurantId(1L);
         return dish;
     }
+
+    private Dish createMenuDish(Long id, String name, String category) {
+        Dish dish = new Dish();
+        dish.setId(id);
+        dish.setName(name);
+        dish.setPrice(10000);
+        dish.setDescription("desc");
+        dish.setImageUrl("https://example.com/img.png");
+        dish.setCategory(category);
+        dish.setRestaurantId(1L);
+        dish.setActive(true);
+        return dish;
+    }
+
+
 
 
     @Test void createDish_success() {
@@ -252,6 +268,76 @@ class DishUseCaseTest {
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
+    }
+
+    @Test
+    void listMenu_success_withoutCategory() {
+        Dish d1 = createMenuDish(1L, "Burger", "FAST_FOOD");
+        Dish d2 = createMenuDish(2L, "Pizza", "FAST_FOOD");
+
+        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 5, null))
+                .thenReturn(List.of(d1, d2));
+
+        List<Dish> result = dishUseCase.listMenu(1L, 0, 5, null);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Burger", result.get(0).getName());
+
+        verify(dishPersistencePort).findMenuByRestaurant(1L, 0, 5, null);
+    }
+
+    @Test
+    void listMenu_success_withCategory() {
+        Dish d1 = createMenuDish(1L, "Ensalada", "HEALTHY");
+
+        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 10, "HEALTHY"))
+                .thenReturn(List.of(d1));
+
+        List<Dish> result = dishUseCase.listMenu(1L, 0, 10, "HEALTHY");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("HEALTHY", result.get(0).getCategory());
+
+        verify(dishPersistencePort).findMenuByRestaurant(1L, 0, 10, "HEALTHY");
+    }
+
+    @Test
+    void listMenu_noDishes_shouldReturnEmptyList() {
+        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 10, null))
+                .thenReturn(List.of());
+
+        List<Dish> result = dishUseCase.listMenu(1L, 0, 10, null);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(dishPersistencePort).findMenuByRestaurant(1L, 0, 10, null);
+    }
+
+    @Test
+    void listMenu_nullRestaurantId_shouldThrowRestaurantNotFoundException() {
+        assertThrows(RestaurantNotFoundException.class,
+                () -> dishUseCase.listMenu(null, 0, 10, null));
+
+        verify(dishPersistencePort, never()).findMenuByRestaurant(any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    void listMenu_invalidPage_shouldThrowInvalidPaginationException() {
+        assertThrows(InvalidPaginationException.class,
+                () -> dishUseCase.listMenu(1L, -1, 10, null));
+
+        verify(dishPersistencePort, never()).findMenuByRestaurant(any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    void listMenu_invalidSize_shouldThrowInvalidPaginationException() {
+        assertThrows(InvalidPaginationException.class,
+                () -> dishUseCase.listMenu(1L, 0, 0, null));
+
+        verify(dishPersistencePort, never()).findMenuByRestaurant(any(), anyInt(), anyInt(), any());
     }
 
 
