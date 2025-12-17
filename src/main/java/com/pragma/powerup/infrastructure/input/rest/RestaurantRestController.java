@@ -1,10 +1,11 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.application.dto.response.RestaurantListResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
+import com.pragma.powerup.application.handler.IRestaurantOwnershipHandler;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,11 +20,12 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class RestaurantRestController {
 
     private final IRestaurantHandler restaurantHandler;
+    private final IRestaurantOwnershipHandler ownershipHandler;
 
     @Operation(
             summary = "Crear restaurante",
@@ -37,9 +39,26 @@ public class RestaurantRestController {
     })
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/restaurants")
+    @PostMapping("/admin/restaurants")
     @ResponseStatus(HttpStatus.CREATED)
     public RestaurantResponseDto createRestaurant(@Valid @RequestBody RestaurantRequestDto dto) {
         return restaurantHandler.createRestaurant(dto);
     }
+
+    // no publica para el
+    @PreAuthorize("hasRole('OWNER')")
+    @GetMapping("/restaurants/{restaurantId}/ownership")
+    public ResponseEntity<Boolean> ownership(@PathVariable Long restaurantId) {
+        return ResponseEntity.ok(ownershipHandler.checkOwnership(restaurantId));
+    }
+
+    @PreAuthorize("hasRole('CLIENT')")
+    @GetMapping("client/restaurants")
+    public ResponseEntity<List<RestaurantListResponseDto>> listRestaurants(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(restaurantHandler.listRestaurants(page, size));
+    }
+
 }

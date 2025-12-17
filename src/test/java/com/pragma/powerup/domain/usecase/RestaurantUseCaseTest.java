@@ -12,7 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -142,4 +144,55 @@ class RestaurantUseCaseTest {
         verify(userExternalServicePort).isOwnerUser(validRestaurant.getOwnerId());
         verify(restaurantPersistencePort, never()).save(any());
     }
+
+    @Test
+    void listRestaurants_success_shouldCallPortWithPagination() {
+        Restaurant r1 = new Restaurant(null, "Arepas", "1", "x", "+57", "logo1", 1L);
+        Restaurant r2 = new Restaurant(null, "Burger", "2", "y", "+57", "logo2", 2L);
+
+        when(restaurantPersistencePort.findAllOrderByNameAsc(0, 2))
+                .thenReturn(List.of(r1, r2));
+
+        var result = restaurantUseCase.listRestaurants(0, 2);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Arepas", result.get(0).getName());
+        assertEquals("Burger", result.get(1).getName());
+
+        verify(restaurantPersistencePort).findAllOrderByNameAsc(0, 2);
+        verifyNoInteractions(userExternalServicePort);
+    }
+
+    @Test
+    void listRestaurants_whenEmpty_shouldReturnEmptyList() {
+        when(restaurantPersistencePort.findAllOrderByNameAsc(0, 10))
+                .thenReturn(List.of());
+
+        var result = restaurantUseCase.listRestaurants(0, 10);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(restaurantPersistencePort).findAllOrderByNameAsc(0, 10);
+        verifyNoInteractions(userExternalServicePort);
+    }
+
+    @Test
+    void listRestaurants_invalidPage_shouldThrowInvalidPaginationException() {
+        assertThrows(InvalidPaginationException.class,
+                () -> restaurantUseCase.listRestaurants(-1, 10));
+
+        verifyNoInteractions(restaurantPersistencePort);
+    }
+
+    @Test
+    void listRestaurants_invalidSize_shouldThrowInvalidPaginationException() {
+        assertThrows(InvalidPaginationException.class,
+                () -> restaurantUseCase.listRestaurants(0, 0));
+
+        verifyNoInteractions(restaurantPersistencePort);
+    }
+
+
 }

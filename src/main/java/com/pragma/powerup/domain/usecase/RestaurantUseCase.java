@@ -8,6 +8,8 @@ import com.pragma.powerup.domain.validation.RestaurantBusinessValidator;
 import com.pragma.powerup.domain.validation.RestaurantDataValidator;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 
 @AllArgsConstructor
 public class RestaurantUseCase implements IRestaurantService {
@@ -15,6 +17,7 @@ public class RestaurantUseCase implements IRestaurantService {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final RestaurantDataValidator dataValidator;
     private final RestaurantBusinessValidator businessValidator;
+
 
     @Override
     public Restaurant createRestaurant(Restaurant restaurant) {
@@ -29,5 +32,14 @@ public class RestaurantUseCase implements IRestaurantService {
                 .orElseThrow(RestaurantNotFoundException::new);
 
         return restaurant.getOwnerId() != null && restaurant.getOwnerId().equals(ownerId);
+    }
+
+    @Override
+    public List<Restaurant> listRestaurants(int page, int size) {
+
+        if (page < 0 || size <= 0) {
+            throw new InvalidPaginationException();
+        }
+        return restaurantPersistencePort.findAllOrderByNameAsc(page, size);
     }
 }

@@ -1,6 +1,7 @@
 package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.application.dto.response.RestaurantListResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import com.pragma.powerup.application.mapper.IRestaurantRequestMapper;
@@ -10,6 +11,8 @@ import com.pragma.powerup.domain.model.Restaurant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -26,5 +29,14 @@ public class RestaurantHandler implements IRestaurantHandler {
         Restaurant restaurant = requestMapper.toRestaurant(dto);
         Restaurant saved = restaurantService.createRestaurant(restaurant);
         return responseMapper.toResponse(saved);
+    }
+
+
+    @Override
+    public List<RestaurantListResponseDto> listRestaurants(int page, int size) {
+        return restaurantService.listRestaurants(page, size)
+                .stream()
+                .map(responseMapper::toListResponse)
+                .toList();
     }
 }
