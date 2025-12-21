@@ -1,11 +1,13 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.model.Restaurant;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.RestaurantEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -48,15 +50,23 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     }
 
     @Override
-    public List<Restaurant> findAllOrderByNameAsc(int page, int size) {
+    public PageModel<Restaurant> findAllOrderByNameAsc(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return restaurantRepository.findAllByOrderByNameAsc(pageable)
-                .stream()
+
+        Page<RestaurantEntity> result = restaurantRepository.findAllByOrderByNameAsc(pageable);
+
+        List<Restaurant> content = result.getContent().stream()
                 .map(restaurantEntityMapper::toRestaurant)
                 .toList();
+
+        return new PageModel<>(
+                content,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isFirst(),
+                result.isLast()
+        );
     }
-
-
-
-
 }

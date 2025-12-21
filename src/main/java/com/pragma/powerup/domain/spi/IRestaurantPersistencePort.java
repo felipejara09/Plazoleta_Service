@@ -1,5 +1,6 @@
 package com.pragma.powerup.domain.spi;
 
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.model.Restaurant;
 
 import java.util.List;
@@ -11,6 +12,6 @@ public interface IRestaurantPersistencePort {
     boolean existsById(Long id);
     Optional<Restaurant> findById(Long id);
     boolean existsByIdAndOwnerId(Long id, Long ownerId);
-    List<Restaurant> findAllOrderByNameAsc(int page, int size);
+    PageModel<Restaurant> findAllOrderByNameAsc(int page, int size);
 
 }

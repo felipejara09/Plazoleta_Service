@@ -2,6 +2,7 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.Dish;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.validation.DishBusinessValidator;
@@ -68,31 +69,32 @@ class DishUseCaseTest {
         return dish;
     }
 
-
-
-
-    @Test void createDish_success() {
+    @Test
+    void createDish_success() {
         when(restaurantPersistencePort.existsById(validDish.getRestaurantId())).thenReturn(true);
+
         dishUseCase.createDish(validDish);
+
         verify(restaurantPersistencePort).existsById(validDish.getRestaurantId());
         verify(dishPersistencePort).save(validDish);
     }
 
-    @Test void createDish_nullActive_setsActiveTrueByDefault() {
+    @Test
+    void createDish_nullActive_setsActiveTrueByDefault() {
         validDish.setActive(null);
         when(restaurantPersistencePort.existsById(validDish.getRestaurantId())).thenReturn(true);
+
         dishUseCase.createDish(validDish);
+
         assertTrue(validDish.getActive());
         verify(dishPersistencePort).save(validDish);
     }
-
 
     @Test
     void createDish_blankName_throwsInvalidDishNameException() {
         validDish.setName("   ");
 
-        assertThrows(InvalidDishNameException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(InvalidDishNameException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
@@ -102,8 +104,7 @@ class DishUseCaseTest {
     void createDish_nameOnlyNumbers_throwsInvalidDishNameException() {
         validDish.setName("123456");
 
-        assertThrows(InvalidDishNameException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(InvalidDishNameException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
@@ -113,8 +114,7 @@ class DishUseCaseTest {
     void createDish_nullPrice_throwsInvalidDishPriceException() {
         validDish.setPrice(null);
 
-        assertThrows(InvalidDishPriceException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(InvalidDishPriceException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
@@ -124,8 +124,7 @@ class DishUseCaseTest {
     void createDish_invalidPrice_throwsInvalidDishPriceException() {
         validDish.setPrice(0);
 
-        assertThrows(InvalidDishPriceException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(InvalidDishPriceException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
@@ -135,8 +134,7 @@ class DishUseCaseTest {
     void createDish_blankDescription_throwsInvalidDishDescriptionException() {
         validDish.setDescription("   ");
 
-        assertThrows(InvalidDishDescriptionException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(InvalidDishDescriptionException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
@@ -146,8 +144,7 @@ class DishUseCaseTest {
     void createDish_invalidImageUrl_throwsInvalidDishImageUrlException() {
         validDish.setImageUrl("htp:/mala-url");
 
-        assertThrows(InvalidDishImageUrlException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(InvalidDishImageUrlException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
@@ -157,13 +154,11 @@ class DishUseCaseTest {
     void createDish_nullRestaurantId_throwsRestaurantNotFoundException() {
         validDish.setRestaurantId(null);
 
-        assertThrows(RestaurantNotFoundException.class,
-                () -> dishUseCase.createDish(validDish));
+        assertThrows(RestaurantNotFoundException.class, () -> dishUseCase.createDish(validDish));
 
         verifyNoInteractions(restaurantPersistencePort);
         verify(dishPersistencePort, never()).save(any());
     }
-
 
     @Test
     void updateDish_success() {
@@ -241,8 +236,6 @@ class DishUseCaseTest {
         verify(dishPersistencePort, never()).save(any());
     }
 
-
-
     @Test
     void changeDishStatus_success() {
         Dish existingDish = createValidDish();
@@ -270,19 +263,34 @@ class DishUseCaseTest {
         verify(dishPersistencePort, never()).save(any());
     }
 
+    // ✅ CAMBIO: ahora retorna PageModel<Dish>
     @Test
     void listMenu_success_withoutCategory() {
         Dish d1 = createMenuDish(1L, "Burger", "FAST_FOOD");
         Dish d2 = createMenuDish(2L, "Pizza", "FAST_FOOD");
 
-        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 5, null))
-                .thenReturn(List.of(d1, d2));
+        PageModel<Dish> page = new PageModel<>(
+                List.of(d1, d2),
+                0, 5,
+                12L, 3,
+                true, false
+        );
 
-        List<Dish> result = dishUseCase.listMenu(1L, 0, 5, null);
+        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 5, null))
+                .thenReturn(page);
+
+        PageModel<Dish> result = dishUseCase.listMenu(1L, 0, 5, null);
 
         assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Burger", result.get(0).getName());
+        assertEquals(2, result.getContent().size());
+        assertEquals("Burger", result.getContent().get(0).getName());
+
+        // metadata útil para front
+        assertEquals(12L, result.getTotalElements());
+        assertEquals(3, result.getTotalPages());
+        assertTrue(result.isFirst());
+        assertTrue(result.hasNext());
+        assertFalse(result.isLast());
 
         verify(dishPersistencePort).findMenuByRestaurant(1L, 0, 5, null);
     }
@@ -291,27 +299,45 @@ class DishUseCaseTest {
     void listMenu_success_withCategory() {
         Dish d1 = createMenuDish(1L, "Ensalada", "HEALTHY");
 
-        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 10, "HEALTHY"))
-                .thenReturn(List.of(d1));
+        PageModel<Dish> page = new PageModel<>(
+                List.of(d1),
+                0, 10,
+                1L, 1,
+                true, true
+        );
 
-        List<Dish> result = dishUseCase.listMenu(1L, 0, 10, "HEALTHY");
+        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 10, "HEALTHY"))
+                .thenReturn(page);
+
+        PageModel<Dish> result = dishUseCase.listMenu(1L, 0, 10, "HEALTHY");
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("HEALTHY", result.get(0).getCategory());
+        assertEquals(1, result.getContent().size());
+        assertEquals("HEALTHY", result.getContent().get(0).getCategory());
+        assertTrue(result.isLast());
+        assertFalse(result.hasNext());
 
         verify(dishPersistencePort).findMenuByRestaurant(1L, 0, 10, "HEALTHY");
     }
 
     @Test
-    void listMenu_noDishes_shouldReturnEmptyList() {
-        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 10, null))
-                .thenReturn(List.of());
+    void listMenu_noDishes_shouldReturnEmptyPage() {
+        PageModel<Dish> emptyPage = new PageModel<>(
+                List.of(),
+                0, 10,
+                0L, 0,
+                true, true
+        );
 
-        List<Dish> result = dishUseCase.listMenu(1L, 0, 10, null);
+        when(dishPersistencePort.findMenuByRestaurant(1L, 0, 10, null))
+                .thenReturn(emptyPage);
+
+        PageModel<Dish> result = dishUseCase.listMenu(1L, 0, 10, null);
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0L, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
 
         verify(dishPersistencePort).findMenuByRestaurant(1L, 0, 10, null);
     }
@@ -339,6 +365,4 @@ class DishUseCaseTest {
 
         verify(dishPersistencePort, never()).findMenuByRestaurant(any(), anyInt(), anyInt(), any());
     }
-
-
 }

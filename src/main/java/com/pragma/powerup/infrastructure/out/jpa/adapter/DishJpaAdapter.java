@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
 import com.pragma.powerup.domain.model.Dish;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.infrastructure.out.jpa.entity.DishEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IDishEntityMapper;
@@ -35,16 +36,26 @@ public class DishJpaAdapter implements IDishPersistencePort {
     }
 
     @Override
-    public List<Dish> findMenuByRestaurant(Long restaurantId, int page, int size, String category) {
+    public PageModel<Dish> findMenuByRestaurant(Long restaurantId, int page, int size, String category) {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<DishEntity> result = (category == null || category.isBlank())
                 ? dishRepository.findByRestaurantIdAndActiveTrueOrderByNameAsc(restaurantId, pageable)
                 : dishRepository.findByRestaurantIdAndCategoryAndActiveTrueOrderByNameAsc(restaurantId, category, pageable);
 
-        return result.stream()
+        List<Dish> content = result.getContent().stream()
                 .map(dishEntityMapper::toDish)
                 .toList();
-    }
 
+        return new PageModel<>(
+                content,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.isFirst(),
+                result.isLast()
+        );
+    }
 }
+

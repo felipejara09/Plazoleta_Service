@@ -1,6 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.exception.*;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.model.Restaurant;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
@@ -28,7 +29,6 @@ class RestaurantUseCaseTest {
     private IUserExternalServicePort userExternalServicePort;
 
     private RestaurantUseCase restaurantUseCase;
-
     private Restaurant validRestaurant;
 
     @BeforeEach
@@ -62,7 +62,6 @@ class RestaurantUseCaseTest {
 
         verify(restaurantPersistencePort).save(validRestaurant);
     }
-
 
     @Test
     void createRestaurant_nameOnlyNumbers_shouldThrowInvalidRestaurantNameException() {
@@ -119,7 +118,6 @@ class RestaurantUseCaseTest {
         verifyNoInteractions(userExternalServicePort);
     }
 
-
     @Test
     void createRestaurant_nitAlreadyExists_shouldThrowInvalidRestaurantNitException() {
         when(restaurantPersistencePort.existsByNitId(validRestaurant.getNitId())).thenReturn(true);
@@ -145,34 +143,58 @@ class RestaurantUseCaseTest {
         verify(restaurantPersistencePort, never()).save(any());
     }
 
+
     @Test
     void listRestaurants_success_shouldCallPortWithPagination() {
         Restaurant r1 = new Restaurant(null, "Arepas", "1", "x", "+57", "logo1", 1L);
         Restaurant r2 = new Restaurant(null, "Burger", "2", "y", "+57", "logo2", 2L);
 
-        when(restaurantPersistencePort.findAllOrderByNameAsc(0, 2))
-                .thenReturn(List.of(r1, r2));
+        PageModel<Restaurant> page = new PageModel<>(
+                List.of(r1, r2),
+                0, 2,
+                20L, 10,
+                true, false
+        );
 
-        var result = restaurantUseCase.listRestaurants(0, 2);
+        when(restaurantPersistencePort.findAllOrderByNameAsc(0, 2))
+                .thenReturn(page);
+
+        PageModel<Restaurant> result = restaurantUseCase.listRestaurants(0, 2);
 
         assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Arepas", result.get(0).getName());
-        assertEquals("Burger", result.get(1).getName());
+        assertEquals(2, result.getContent().size());
+        assertEquals("Arepas", result.getContent().get(0).getName());
+        assertEquals("Burger", result.getContent().get(1).getName());
+
+        // metadata
+        assertEquals(20L, result.getTotalElements());
+        assertEquals(10, result.getTotalPages());
+        assertTrue(result.isFirst());
+        assertTrue(result.hasNext());
 
         verify(restaurantPersistencePort).findAllOrderByNameAsc(0, 2);
         verifyNoInteractions(userExternalServicePort);
     }
 
     @Test
-    void listRestaurants_whenEmpty_shouldReturnEmptyList() {
-        when(restaurantPersistencePort.findAllOrderByNameAsc(0, 10))
-                .thenReturn(List.of());
+    void listRestaurants_whenEmpty_shouldReturnEmptyPage() {
+        PageModel<Restaurant> empty = new PageModel<>(
+                List.of(),
+                0, 10,
+                0L, 0,
+                true, true
+        );
 
-        var result = restaurantUseCase.listRestaurants(0, 10);
+        when(restaurantPersistencePort.findAllOrderByNameAsc(0, 10))
+                .thenReturn(empty);
+
+        PageModel<Restaurant> result = restaurantUseCase.listRestaurants(0, 10);
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0L, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
+        assertTrue(result.isLast());
 
         verify(restaurantPersistencePort).findAllOrderByNameAsc(0, 10);
         verifyNoInteractions(userExternalServicePort);
@@ -193,6 +215,4 @@ class RestaurantUseCaseTest {
 
         verifyNoInteractions(restaurantPersistencePort);
     }
-
-
 }

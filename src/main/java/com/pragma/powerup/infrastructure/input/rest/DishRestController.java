@@ -4,6 +4,7 @@ import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.request.DishUpdateRequestDto;
 import com.pragma.powerup.application.dto.response.DishMenuResponseDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
+import com.pragma.powerup.application.dto.response.PageResponseDto;
 import com.pragma.powerup.application.handler.IDishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 
 @RestController
@@ -83,13 +83,14 @@ public class DishRestController {
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("client/restaurants/{restaurantId}/dishes")
-    public ResponseEntity<List<DishMenuResponseDto>> listDishesByRestaurant(
+    public ResponseEntity<PageResponseDto<DishMenuResponseDto>> listDishesByRestaurant(
             @PathVariable Long restaurantId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String category
     ) {
         return ResponseEntity.ok(dishHandler.listMenu(restaurantId, page, size, category));
+
     }
 
 
