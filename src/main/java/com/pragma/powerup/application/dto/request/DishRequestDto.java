@@ -1,0 +1,35 @@
+package com.pragma.powerup.application.dto.request;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+@Getter
+@Setter
+public class DishRequestDto {
+
+    @NotBlank
+    private String name;
+
+    @NotNull
+    @Min(1)
+    private Integer price;
+
+    @NotBlank
+    private String description;
+
+    @NotBlank
+    private String imageUrl;
+
+    @NotBlank
+    private String category;
+
+    @NotNull
+    private Long restaurantId;
+
+    @NotNull
+    private Long ownerId;
+}

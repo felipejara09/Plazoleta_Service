@@ -5,13 +5,13 @@ import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.Restaurant;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserExternalServicePort;
-import com.pragma.powerup.domain.util.RestaurantValidationConstants;
+import com.pragma.powerup.domain.util.ValidationConstants;
 import lombok.AllArgsConstructor;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.pragma.powerup.domain.util.RestaurantValidationConstants.LOGO_URL_REGEX;
+
+import static com.pragma.powerup.domain.util.ValidationConstants.URL_REGEX;
 
 @AllArgsConstructor
 public class RestaurantUseCase implements IRestaurantService {
@@ -27,10 +27,10 @@ public class RestaurantUseCase implements IRestaurantService {
                 restaurant.getName().trim().matches("^\\d+$")) {
             throw new InvalidRestaurantNameException();
         }
-        if (!Pattern.matches(RestaurantValidationConstants.NIT_REGEX, restaurant.getNitId())) {
+        if (!Pattern.matches(ValidationConstants.NIT_REGEX, restaurant.getNitId())) {
             throw new InvalidRestaurantNitException();
         }
-        if (!Pattern.matches(RestaurantValidationConstants.PHONE_REGEX, restaurant.getPhoneNumber())) {
+        if (!Pattern.matches(ValidationConstants.PHONE_REGEX, restaurant.getPhoneNumber())) {
             throw new InvalidRestaurantPhoneException();
         }
         if (restaurantPersistencePort.existsByNitId(restaurant.getNitId())) {
@@ -41,7 +41,7 @@ public class RestaurantUseCase implements IRestaurantService {
             throw new OwnerIsNotOwnerRoleException();
         }
         if (restaurant.getLogoUrl() == null ||
-                !restaurant.getLogoUrl().matches(LOGO_URL_REGEX)) {
+                !restaurant.getLogoUrl().matches(URL_REGEX)) {
             throw new InvalidLogoUrlException();
         }
 
