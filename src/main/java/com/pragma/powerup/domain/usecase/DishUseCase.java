@@ -34,6 +34,17 @@ public class DishUseCase implements IDishService {
         existingDish.setDescription(description);
         dishPersistencePort.save(existingDish);
     }
+
+    @Override
+    public void changeDishStatus(Long dishId, Boolean active, Long ownerId) {
+        Dish dish = dishPersistencePort.findById(dishId)
+                .orElseThrow(DishNotFoundException::new);
+
+        businessValidator.validateRestaurantBelongsToOwner(dish.getRestaurantId(), ownerId);
+
+        dish.setActive(active);
+        dishPersistencePort.save(dish);
+    }
 }
 
 
