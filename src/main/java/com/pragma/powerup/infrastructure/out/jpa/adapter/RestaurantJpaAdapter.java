@@ -2,11 +2,12 @@ package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
 import com.pragma.powerup.domain.model.Restaurant;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.out.jpa.entity.RestaurantEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,17 @@ public class RestaurantJpaAdapter implements IRestaurantPersistencePort {
     public boolean existsByIdAndOwnerId(Long restaurantId, Long ownerId) {
         return restaurantRepository.existsByIdAndOwnerId(restaurantId, ownerId);
     }
+
+    @Override
+    public List<Restaurant> findAllOrderByNameAsc(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return restaurantRepository.findAllByOrderByNameAsc(pageable)
+                .stream()
+                .map(restaurantEntityMapper::toRestaurant)
+                .toList();
+    }
+
+
 
 
 }

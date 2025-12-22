@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 
 @Getter
@@ -24,7 +25,7 @@ public class RestaurantRequestDto {
     @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    @NotBlank(message = "User is not an OWNER")
+    @NotNull(message = "User is not an OWNER")
     private long ownerId;
 
     @NotBlank(message = "Logo URL is required")

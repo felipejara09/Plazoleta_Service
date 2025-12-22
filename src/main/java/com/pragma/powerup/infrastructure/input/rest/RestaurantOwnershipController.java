@@ -9,16 +9,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+/*@RestController
 @RequestMapping("/api/v1/restaurants")
-@RequiredArgsConstructor
+@RequiredArgsConstructor*/
 public class RestaurantOwnershipController {
 
-    private final IRestaurantOwnershipHandler ownershipHandler;
+    /* private final IRestaurantOwnershipHandler ownershipHandler;
 
     @PreAuthorize("hasRole('OWNER')")
     @GetMapping("/{restaurantId}/ownership")
     public ResponseEntity<Boolean> ownership(@PathVariable Long restaurantId) {
         return ResponseEntity.ok(ownershipHandler.checkOwnership(restaurantId));
-    }
+    }*/
 }
