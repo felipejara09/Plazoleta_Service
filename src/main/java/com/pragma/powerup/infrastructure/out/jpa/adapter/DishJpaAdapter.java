@@ -29,4 +29,10 @@ public class DishJpaAdapter implements IDishPersistencePort {
         return dishRepository.findById(id)
                 .map(dishEntityMapper::toDish);
     }
+
+    @Override
+    public boolean existsByIdAndRestaurantIdAndActiveTrue(Long dishId, Long restaurantId) {
+        return dishRepository.existsByIdAndRestaurantIdAndActiveTrue(dishId, restaurantId);
+    }
+
 }

@@ -4,4 +4,7 @@ import com.pragma.powerup.infrastructure.out.jpa.entity.DishEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IDishRepository extends JpaRepository<DishEntity, Long> {
+
+    boolean existsByIdAndRestaurantIdAndActiveTrue(Long id, Long restaurantId);
+
 }
