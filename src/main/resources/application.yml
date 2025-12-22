@@ -15,7 +15,9 @@ spring:
     locations: classpath:db.migration
 
 
-
+jwt:
+  secret: "EstaEsUnaClaveSuperSecretaDeAlMenos32Chars!!"
+  expiration: 3600000
 
 appDescription: "Pragma Powerup"
 appVersion: "1.0.0"

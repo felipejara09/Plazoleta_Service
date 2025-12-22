@@ -8,6 +8,8 @@ import com.pragma.powerup.infrastructure.out.jpa.repository.IDishRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
 public class DishJpaAdapter implements IDishPersistencePort {
@@ -20,5 +22,11 @@ public class DishJpaAdapter implements IDishPersistencePort {
         DishEntity entity = dishEntityMapper.toEntity(dish);
         DishEntity saved = dishRepository.save(entity);
         return dishEntityMapper.toDish(saved);
+    }
+
+    @Override
+    public Optional<Dish> findById(Long id) {
+        return dishRepository.findById(id)
+                .map(dishEntityMapper::toDish);
     }
 }

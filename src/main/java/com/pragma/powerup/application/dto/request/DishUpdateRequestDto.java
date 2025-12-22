@@ -9,10 +9,8 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class DishRequestDto {
+public class DishUpdateRequestDto {
 
-    @NotBlank(message = "Dish name is required")
-    private String name;
 
     @NotNull(message = "Price is required")
     @Min(value = 1, message = "Price must be greater than zero")
@@ -21,13 +19,5 @@ public class DishRequestDto {
     @NotBlank(message = "Description is required")
     private String description;
 
-    @NotBlank(message = "Image URL is required")
-    private String imageUrl;
-
-    @NotBlank(message = "Category is required")
-    private String category;
-
-    @NotNull(message = "Restaurant ID is required")
-    private Long restaurantId;
-
 }
+
