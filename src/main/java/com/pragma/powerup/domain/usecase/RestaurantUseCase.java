@@ -22,4 +22,12 @@ public class RestaurantUseCase implements IRestaurantService {
         businessValidator.validate(restaurant);
         return restaurantPersistencePort.save(restaurant);
     }
+
+    @Override
+    public boolean isRestaurantOwnedByAuthenticatedOwner(Long restaurantId, Long ownerId) {
+        Restaurant restaurant = restaurantPersistencePort.findById(restaurantId)
+                .orElseThrow(RestaurantNotFoundException::new);
+
+        return restaurant.getOwnerId() != null && restaurant.getOwnerId().equals(ownerId);
+    }
 }

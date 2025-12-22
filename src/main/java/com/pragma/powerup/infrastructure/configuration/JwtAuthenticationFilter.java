@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.configuration;
 
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,29 +28,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
+        if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            try {
-                Claims claims = jwtValidator.getClaims(token);
+        String token = header.substring(7);
 
-                String email = claims.getSubject();
-                String role = claims.get("role", String.class); // ADMIN, OWNER...
+        try {
+            Claims claims = jwtValidator.getClaims(token);
 
-                SimpleGrantedAuthority authority =
-                        new SimpleGrantedAuthority("ROLE_" + role);
+            String email = claims.getSubject();
+            String role = claims.get("role", String.class);
+            Long userId = getUserIdFromClaims(claims);
 
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
+            AuthPrincipal principal = new AuthPrincipal(userId, email, role);
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (RuntimeException ex) {
-                SecurityContextHolder.clearContext();
-            }
+            var authority = new SimpleGrantedAuthority("ROLE_" + role);
+
+            var auth = new UsernamePasswordAuthenticationToken(
+                    principal,
+                    null,
+                    List.of(authority)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (Exception ex) {
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\":\"Invalid or expired token\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private Long getUserIdFromClaims(Claims claims) {
+        Object id = claims.get("id");
+        if (id instanceof Integer) return ((Integer) id).longValue();
+        if (id instanceof Long) return (Long) id;
+        if (id instanceof String) return Long.parseLong((String) id);
+        throw new IllegalArgumentException("Token does not contain a valid 'id' claim");
     }
 }
