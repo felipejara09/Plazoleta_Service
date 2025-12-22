@@ -36,6 +36,10 @@ public class DishJpaAdapter implements IDishPersistencePort {
     }
 
     @Override
+    public boolean existsByIdAndRestaurantIdAndActiveTrue(Long dishId, Long restaurantId) {
+        return dishRepository.existsByIdAndRestaurantIdAndActiveTrue(dishId, restaurantId);
+    }
+
     public PageModel<Dish> findMenuByRestaurant(Long restaurantId, int page, int size, String category) {
         Pageable pageable = PageRequest.of(page, size);
 
