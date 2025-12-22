@@ -2,6 +2,7 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IRestaurantService;
 import com.pragma.powerup.domain.exception.*;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.model.Restaurant;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.validation.RestaurantBusinessValidator;
@@ -35,7 +36,7 @@ public class RestaurantUseCase implements IRestaurantService {
     }
 
     @Override
-    public List<Restaurant> listRestaurants(int page, int size) {
+    public PageModel<Restaurant> listRestaurants(int page, int size) {
 
         if (page < 0 || size <= 0) {
             throw new InvalidPaginationException();

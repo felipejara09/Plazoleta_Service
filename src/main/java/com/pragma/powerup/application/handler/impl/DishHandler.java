@@ -2,13 +2,19 @@ package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.request.DishUpdateRequestDto;
+import com.pragma.powerup.application.dto.response.DishMenuResponseDto;
+import com.pragma.powerup.application.dto.response.PageResponseDto;
 import com.pragma.powerup.application.handler.IDishHandler;
 import com.pragma.powerup.application.mapper.IDishRequestMapper;
+import com.pragma.powerup.application.mapper.IDishResponseMapper;
 import com.pragma.powerup.domain.api.IDishService;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.spi.ISecurityPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +23,7 @@ public class DishHandler implements IDishHandler {
 
     private final IDishService dishService;
     private final IDishRequestMapper dishRequestMapper;
+    private final IDishResponseMapper dishResponseMapper;
     private final ISecurityPort securityPort;
 
     @Override
@@ -38,4 +45,28 @@ public class DishHandler implements IDishHandler {
         Long ownerId = securityPort.getAuthenticatedUserId();
         dishService.changeDishStatus(dishId, active, ownerId);
     }
+
+
+    @Override
+    public PageResponseDto<DishMenuResponseDto> listMenu(Long restaurantId, int page, int size, String category) {
+
+        PageModel<DishMenuResponseDto> mapped =
+                dishService.listMenu(restaurantId, page, size, category)
+                        .map(dishResponseMapper::toMenuResponse);
+
+        return new PageResponseDto<>(
+                mapped.getContent(),
+                new PageResponseDto.Meta(
+                        mapped.getPageNumber(),
+                        mapped.getPageSize(),
+                        mapped.getTotalElements(),
+                        mapped.getTotalPages(),
+                        mapped.isFirst(),
+                        mapped.isLast(),
+                        mapped.hasNext(),
+                        mapped.hasPrevious()
+                )
+        );
+    }
+
 }

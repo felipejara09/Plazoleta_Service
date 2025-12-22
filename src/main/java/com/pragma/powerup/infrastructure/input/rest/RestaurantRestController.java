@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.application.dto.response.PageResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantListResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
@@ -54,7 +55,7 @@ public class RestaurantRestController {
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("client/restaurants")
-    public ResponseEntity<List<RestaurantListResponseDto>> listRestaurants(
+    public ResponseEntity<PageResponseDto<RestaurantListResponseDto>> listRestaurants(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
