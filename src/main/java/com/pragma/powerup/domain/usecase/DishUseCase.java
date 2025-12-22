@@ -3,10 +3,13 @@ package com.pragma.powerup.domain.usecase;
 import com.pragma.powerup.domain.api.IDishService;
 import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.Dish;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.domain.validation.DishBusinessValidator;
 import com.pragma.powerup.domain.validation.DishDataValidator;
 import lombok.RequiredArgsConstructor;
+
+
 
 
 @RequiredArgsConstructor
@@ -45,6 +48,20 @@ public class DishUseCase implements IDishService {
         dish.setActive(active);
         dishPersistencePort.save(dish);
     }
+
+    @Override
+    public PageModel<Dish> listMenu(Long restaurantId, int page, int size, String category) {
+
+        if (restaurantId == null || restaurantId <= 0) {
+            throw new RestaurantNotFoundException(); // o InvalidRestaurantIdException
+        }
+        if (page < 0 || size <= 0) {
+            throw new InvalidPaginationException();
+        }
+
+        return dishPersistencePort.findMenuByRestaurant(restaurantId, page, size, category);
+    }
+
 }
 
 
