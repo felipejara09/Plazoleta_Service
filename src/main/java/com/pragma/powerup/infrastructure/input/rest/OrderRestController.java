@@ -2,7 +2,10 @@ package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.OrderRequestDto;
 import com.pragma.powerup.application.dto.response.OrderCreatedResponseDto;
+import com.pragma.powerup.application.dto.response.OrderResponseDto;
 import com.pragma.powerup.application.handler.IOrderHandler;
+import com.pragma.powerup.domain.model.OrderStatus;
+import com.pragma.powerup.domain.model.PageModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +26,17 @@ public class OrderRestController {
             @Validated @RequestBody OrderRequestDto request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderHandler.createOrder(request));
+    }
+
+    @PreAuthorize("hasRole('EMPLOYED')")
+    @GetMapping("employeedonde :/orders")
+    public PageModel<OrderResponseDto> listByStatus(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam String status,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        String token = authorization.replace("Bearer ", "").trim();
+        return orderHandler.listOrdersForEmployeeByStatus(token, status, page, size);
     }
 }

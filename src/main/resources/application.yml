@@ -23,3 +23,7 @@ jwt:
 
 appDescription: "Pragma Powerup"
 appVersion: "1.0.0"
+
+services:
+  user:
+    base-url: http://localhost:8081

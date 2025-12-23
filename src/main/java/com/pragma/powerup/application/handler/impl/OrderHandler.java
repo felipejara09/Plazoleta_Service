@@ -2,11 +2,16 @@ package com.pragma.powerup.application.handler.impl;
 
 import com.pragma.powerup.application.dto.request.OrderRequestDto;
 import com.pragma.powerup.application.dto.response.OrderCreatedResponseDto;
+import com.pragma.powerup.application.dto.response.OrderResponseDto;
 import com.pragma.powerup.application.handler.IOrderHandler;
+import com.pragma.powerup.application.mapper.IOrderResponseMapper;
 import com.pragma.powerup.domain.api.IOrderService;
 import com.pragma.powerup.domain.model.Order;
 import com.pragma.powerup.domain.model.OrderItem;
+import com.pragma.powerup.domain.model.OrderStatus;
+import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.spi.ISecurityPort;
+import com.pragma.powerup.infrastructure.configuration.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +23,7 @@ public class OrderHandler implements IOrderHandler {
 
     private final IOrderService orderService;
     private final ISecurityPort securityPort;
+    private final IOrderResponseMapper mapper;
 
     @Override
     public OrderCreatedResponseDto createOrder(OrderRequestDto request) {
@@ -36,5 +42,12 @@ public class OrderHandler implements IOrderHandler {
         Order created = orderService.createOrder(order);
 
         return new OrderCreatedResponseDto(created.getId(), created.getStatus().name());
+    }
+
+    @Override
+    public PageModel<OrderResponseDto> listOrdersForEmployeeByStatus(String token, String status, int page, int size) {
+        return orderService
+                .listOrdersForEmployeeByStatus(token, status, page, size)
+                .map(mapper::toResponse);
     }
 }

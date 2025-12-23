@@ -28,8 +28,7 @@ public class OrderEntity {
     private Long clientId;
 
     @Column(nullable = false)
-    private String status; // PENDIENTE, ...
-
+    private String status;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

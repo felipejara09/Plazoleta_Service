@@ -3,10 +3,7 @@ package com.pragma.powerup.infrastructure.configuration;
 import com.pragma.powerup.domain.api.IDishService;
 import com.pragma.powerup.domain.api.IOrderService;
 import com.pragma.powerup.domain.api.IRestaurantService;
-import com.pragma.powerup.domain.spi.IDishPersistencePort;
-import com.pragma.powerup.domain.spi.IOrderPersistencePort;
-import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
-import com.pragma.powerup.domain.spi.IUserExternalServicePort;
+import com.pragma.powerup.domain.spi.*;
 import com.pragma.powerup.domain.usecase.DishUseCase;
 import com.pragma.powerup.domain.usecase.OrderUseCase;
 import com.pragma.powerup.domain.usecase.RestaurantUseCase;
@@ -23,6 +20,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -140,9 +138,14 @@ public class BeanConfiguration {
     public IOrderService orderService(
             IOrderPersistencePort orderPersistencePort,
             OrderDataValidator dataValidator,
-            OrderBusinessValidator businessValidator
+            OrderBusinessValidator businessValidator,
+            IEmployeeRestaurantPort employeeRestaurantPort
     ) {
-        return new OrderUseCase(orderPersistencePort, dataValidator, businessValidator);
+        return new OrderUseCase(orderPersistencePort, dataValidator, businessValidator, employeeRestaurantPort);
+    }
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
 }

@@ -20,7 +20,7 @@ public class OrderBusinessValidator {
     private final IDishPersistencePort dishPersistencePort;
 
     private static final EnumSet<OrderStatus> ACTIVE =
-            EnumSet.of(OrderStatus.PENDIENTE, OrderStatus.EN_PREPARACION, OrderStatus.LISTO);
+            EnumSet.of(OrderStatus.PENDING, OrderStatus.IN_PREPARATION, OrderStatus.READY);
 
     public void validateClientHasNoActiveOrder(Long clientId) {
         boolean hasActive = orderPersistencePort.existsByClientIdAndStatusIn(clientId, ACTIVE);
