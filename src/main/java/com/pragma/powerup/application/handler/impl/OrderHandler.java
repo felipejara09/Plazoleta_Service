@@ -50,4 +50,15 @@ public class OrderHandler implements IOrderHandler {
                 .listOrdersForEmployeeByStatus(token, status, page, size)
                 .map(mapper::toResponse);
     }
+
+    @Override
+    public OrderResponseDto assignAndStartPreparation(Long orderId) {
+
+        String token = SecurityUtils.getToken();
+        Long employeeId = SecurityUtils.getUserId();
+
+        return mapper.toResponse(
+                orderService.assignToOrderAndStartPreparation(token, employeeId, orderId)
+        );
+    }
 }

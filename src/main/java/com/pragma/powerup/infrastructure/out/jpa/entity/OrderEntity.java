@@ -34,4 +34,7 @@ public class OrderEntity {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items;
+
+    @Column(name = "assigned_employee_id")
+    private Long assignedEmployedId;
 }

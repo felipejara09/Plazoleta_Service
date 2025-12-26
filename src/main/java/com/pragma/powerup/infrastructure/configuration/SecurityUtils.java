@@ -16,4 +16,14 @@ public final class SecurityUtils {
 
         return ((AuthPrincipal) principal).getUserId();
     }
+
+    public static String getToken() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        var principal = auth.getPrincipal();
+        if (!(principal instanceof AuthPrincipal)) {
+            throw new IllegalStateException("No authenticated user in SecurityContext");
+        }
+        return ((AuthPrincipal) principal).getToken();
+    }
+
 }

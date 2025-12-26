@@ -1,8 +1,6 @@
 package com.pragma.powerup.domain.validation;
 
-import com.pragma.powerup.domain.exception.ClientHasActiveOrderException;
-import com.pragma.powerup.domain.exception.DishDoesNotBelongToRestaurantException;
-import com.pragma.powerup.domain.exception.RestaurantNotFoundException;
+import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.Order;
 import com.pragma.powerup.domain.model.OrderStatus;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
@@ -44,4 +42,10 @@ public class OrderBusinessValidator {
             throw new DishDoesNotBelongToRestaurantException();
         }
     }
+
+
+
+
+
+
 }

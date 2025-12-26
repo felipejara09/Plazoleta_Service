@@ -29,7 +29,7 @@ public class OrderRestController {
     }
 
     @PreAuthorize("hasRole('EMPLOYED')")
-    @GetMapping("employeedonde :/orders")
+    @GetMapping("employee/orders")
     public PageModel<OrderResponseDto> listByStatus(
             @RequestHeader("Authorization") String authorization,
             @RequestParam String status,
@@ -39,4 +39,11 @@ public class OrderRestController {
         String token = authorization.replace("Bearer ", "").trim();
         return orderHandler.listOrdersForEmployeeByStatus(token, status, page, size);
     }
+
+    @PreAuthorize("hasRole('EMPLOYED')")
+    @PatchMapping("/employee/orders/{orderId}/assign")
+    public ResponseEntity<OrderResponseDto> assignAndStart(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderHandler.assignAndStartPreparation(orderId));
+    }
+
 }

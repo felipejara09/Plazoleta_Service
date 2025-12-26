@@ -18,4 +18,6 @@ public class Order {
     private OrderStatus status;
     private LocalDateTime createdAt;
     private List<OrderItem> items;
+
+    private Long assignedEmployedId;
 }

@@ -139,13 +139,39 @@ public class BeanConfiguration {
             IOrderPersistencePort orderPersistencePort,
             OrderDataValidator dataValidator,
             OrderBusinessValidator businessValidator,
-            IEmployeeRestaurantPort employeeRestaurantPort
+            IEmployeeRestaurantPort employeeRestaurantPort,
+            EmployeeRestaurantScopeValidator restaurantScopeValidator,
+            OrderListEmployeeValidator listEmployeeValidator,
+            OrderCommandValidator commandValidator,
+            OrderAssignEmployeeValidator assignEmployeeValidator
     ) {
-        return new OrderUseCase(orderPersistencePort, dataValidator, businessValidator, employeeRestaurantPort);
+        return new OrderUseCase(orderPersistencePort, dataValidator, businessValidator,
+                                employeeRestaurantPort, listEmployeeValidator, restaurantScopeValidator
+        ,                       commandValidator,assignEmployeeValidator);
     }
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Bean
+    public OrderListEmployeeValidator orderListEmployeeValidator() {
+        return new OrderListEmployeeValidator();
+    }
+
+    @Bean
+    public OrderAssignEmployeeValidator orderAssignEmployeeValidator() {
+        return new OrderAssignEmployeeValidator();
+    }
+
+    @Bean
+    public OrderCommandValidator orderCommandValidator() {
+        return new OrderCommandValidator();
+    }
+
+    @Bean
+    public EmployeeRestaurantScopeValidator employeeRestaurantScopeValidator() {
+        return new EmployeeRestaurantScopeValidator();
     }
 
 }

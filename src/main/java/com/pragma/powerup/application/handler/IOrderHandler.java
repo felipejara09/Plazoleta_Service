@@ -9,4 +9,5 @@ import com.pragma.powerup.domain.model.PageModel;
 public interface IOrderHandler {
     OrderCreatedResponseDto createOrder(OrderRequestDto request);
     PageModel<OrderResponseDto> listOrdersForEmployeeByStatus(String token, String status, int page, int size);
+    OrderResponseDto assignAndStartPreparation(Long orderId);
 }

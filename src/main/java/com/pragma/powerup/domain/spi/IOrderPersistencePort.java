@@ -10,4 +10,5 @@ public interface IOrderPersistencePort {
     boolean existsByClientIdAndStatusIn(Long clientId, Set<OrderStatus> statuses);
     Order save(Order order);
     PageModel<Order> findByRestaurantIdAndStatus(Long restaurantId, OrderStatus status, int page, int size);
+    Order findById(Long orderId);
 }

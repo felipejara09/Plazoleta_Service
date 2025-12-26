@@ -9,8 +9,7 @@ import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.domain.spi.IEmployeeRestaurantPort;
 import com.pragma.powerup.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
-import com.pragma.powerup.domain.validation.OrderBusinessValidator;
-import com.pragma.powerup.domain.validation.OrderDataValidator;
+import com.pragma.powerup.domain.validation.*;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -23,6 +22,10 @@ public class OrderUseCase implements IOrderService {
     private final OrderDataValidator dataValidator;
     private final OrderBusinessValidator businessValidator;
     private final IEmployeeRestaurantPort employeeRestaurantPort;
+    private final OrderListEmployeeValidator listEmployeeValidator;
+    private final EmployeeRestaurantScopeValidator restaurantScopeValidator;
+    private final OrderCommandValidator commandValidator;
+    private final OrderAssignEmployeeValidator assignEmployeeValidator;
 
     private static final EnumSet<OrderStatus> ACTIVE =
             EnumSet.of(OrderStatus.PENDING, OrderStatus.IN_PREPARATION, OrderStatus.READY);
@@ -45,23 +48,36 @@ public class OrderUseCase implements IOrderService {
     @Override
     public PageModel<Order> listOrdersForEmployeeByStatus(String token, String status, int page, int size) {
 
-        if (status == null) {
-            throw new InvalidOrderStatusFilterException();
-        }
-        if (page < 0 || size <= 0){
-            throw new InvalidPaginationException();
-        }
 
-        OrderStatus orderStatus;
-        try {
-            orderStatus = OrderStatus.valueOf(status);
-        } catch (Exception e) {
-            throw new InvalidOrderStatusFilterException();
-        }
+        OrderStatus orderStatus = listEmployeeValidator.parseAndValidateStatus(status);
+        listEmployeeValidator.validatePagination(page, size);
 
         Long restaurantId = employeeRestaurantPort.getMyRestaurantId(token);
-        if (restaurantId == null || restaurantId <= 0) throw new EmployeeRestaurantNotFoundException();
+        restaurantScopeValidator.validateAndGetRestaurantId(restaurantId);
 
         return orderPersistencePort.findByRestaurantIdAndStatus(restaurantId, orderStatus, page, size);
+    }
+
+    @Override
+    public Order assignToOrderAndStartPreparation(String token, Long employeeId, Long orderId) {
+
+        commandValidator.validateEmployeeId(employeeId);
+        commandValidator.validateOrderId(orderId);
+
+        Long employeeRestaurantId = employeeRestaurantPort.getMyRestaurantId(token);
+        restaurantScopeValidator.validateAndGetRestaurantId(employeeRestaurantId);
+
+        Order order = orderPersistencePort.findById(orderId);
+        if (order == null) throw new OrderNotFoundException();
+
+        restaurantScopeValidator.validateOrderBelongsToEmployeeRestaurant(order, employeeRestaurantId);
+
+        assignEmployeeValidator.validateOrderIsPending(order);
+        assignEmployeeValidator.validateNotAssignedToAnotherEmployee(order, employeeId);
+
+        order.setAssignedEmployedId(employeeId);
+        order.setStatus(OrderStatus.IN_PREPARATION);
+
+        return orderPersistencePort.save(order);
     }
 }

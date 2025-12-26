@@ -9,4 +9,5 @@ public class AuthPrincipal {
     private final Long userId;
     private final String email;
     private final String role;
+    private final String token;
 }
