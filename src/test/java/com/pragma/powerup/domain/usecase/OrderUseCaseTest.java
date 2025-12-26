@@ -68,11 +68,7 @@ class OrderUseCaseTest {
         o.setCreatedAt(null);
         return o;
     }
-
-    // =========================================================
-    // HU11 - Crear pedido (cliente)
-    // =========================================================
-
+    
     @Test
     void createOrder_success_setsPendingAndCreatedAt_andSaves() {
         Order draft = createValidOrderDraft();
@@ -90,7 +86,6 @@ class OrderUseCaseTest {
 
         when(orderPersistencePort.save(any(Order.class))).thenAnswer(inv -> {
             Order arg = inv.getArgument(0);
-            // Simula persistencia devolviendo el mismo objeto con id
             arg.setId(999L);
             return arg;
         });
@@ -121,10 +116,6 @@ class OrderUseCaseTest {
         verifyNoInteractions(businessValidator);
         verify(orderPersistencePort, never()).save(any());
     }
-
-    // =========================================================
-    // HU12 - Listar pedidos por estado (empleado) con paginación
-    // =========================================================
 
     @Test
     void listOrdersForEmployeeByStatus_success_callsPortWithEmployeeRestaurant() {
@@ -179,10 +170,6 @@ class OrderUseCaseTest {
 
         verify(orderPersistencePort, never()).findByRestaurantIdAndStatus(any(), any(), anyInt(), anyInt());
     }
-
-    // =========================================================
-    // HU13 - Asignarse pedido + cambiar estado a IN_PREPARATION
-    // =========================================================
 
     @Test
     void assignToOrderAndStartPreparation_success_setsEmployeeAndInPreparation_andSaves() {
@@ -257,7 +244,7 @@ class OrderUseCaseTest {
 
         Order existing = new Order();
         existing.setId(orderId);
-        existing.setRestaurantId(999L); // otro restaurante
+        existing.setRestaurantId(999L);
         existing.setStatus(OrderStatus.PENDING);
 
         when(orderPersistencePort.findById(orderId)).thenReturn(existing);
