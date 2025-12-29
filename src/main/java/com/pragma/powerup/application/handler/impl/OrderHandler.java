@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.handler.impl;
 
+import com.pragma.powerup.application.dto.request.DeliverOrderRequestDto;
 import com.pragma.powerup.application.dto.request.OrderRequestDto;
 import com.pragma.powerup.application.dto.response.OrderCreatedResponseDto;
 import com.pragma.powerup.application.dto.response.OrderResponseDto;
@@ -60,5 +61,12 @@ public class OrderHandler implements IOrderHandler {
         return mapper.toResponse(
                 orderService.assignToOrderAndStartPreparation(token, employeeId, orderId)
         );
+    }
+
+    @Override
+    public void deliverOrder(Long orderId, DeliverOrderRequestDto dto) {
+        String token = SecurityUtils.getToken();
+        Long employeeId = SecurityUtils.getUserId();
+        orderService.deliverOrder(token, employeeId, orderId, dto.getPin());
     }
 }

@@ -148,7 +148,8 @@ public class BeanConfiguration {
             OrderReadyValidator orderReadyValidator,
             IPinGeneratorPort pinGeneratorPort,
             IUserExternalServicePort userExternalServicePort,
-            IMessagingPort messagingPort
+            IMessagingPort messagingPort,
+            OrderDeliverValidator orderDeliverValidator
     ) {
         return new OrderUseCase(orderPersistencePort,
                 dataValidator,
@@ -161,7 +162,8 @@ public class BeanConfiguration {
                 orderReadyValidator,
                 pinGeneratorPort,
                 userExternalServicePort,
-                messagingPort);
+                messagingPort,
+                orderDeliverValidator);
     }
     @Bean
     public RestTemplate restTemplate() {
@@ -196,6 +198,11 @@ public class BeanConfiguration {
     @Bean
     public IPinGeneratorPort pinGeneratorPort() {
         return new PinGeneratorAdapter();
+    }
+
+    @Bean
+    public OrderDeliverValidator orderDeliverValidator() {
+        return new OrderDeliverValidator();
     }
 
 }

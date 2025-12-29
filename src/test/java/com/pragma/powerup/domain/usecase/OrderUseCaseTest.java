@@ -55,6 +55,7 @@ class OrderUseCaseTest {
                 restaurantScopeValidator,
                 commandValidator,
                 assignEmployeeValidator
+
         );
     }
 
@@ -73,7 +74,7 @@ class OrderUseCaseTest {
     void createOrder_success_setsPendingAndCreatedAt_andSaves() {
         Order draft = createValidOrderDraft();
 
-        // Validaciones OK
+
         doNothing().when(dataValidator).validateForCreate(draft);
         doNothing().when(businessValidator).validateClientHasNoActiveOrder(clientId);
         doNothing().when(businessValidator).validateRestaurantExists(restaurantId);
@@ -161,7 +162,6 @@ class OrderUseCaseTest {
         doNothing().when(listEmployeeValidator).validatePagination(0, 10);
 
         when(employeeRestaurantPort.getMyRestaurantId(token)).thenReturn(null);
-        // tu validator debe lanzar acá
         doThrow(new RuntimeException("Employee has no restaurant"))
                 .when(restaurantScopeValidator).validateAndGetRestaurantId(null);
 
@@ -173,7 +173,7 @@ class OrderUseCaseTest {
 
     @Test
     void assignToOrderAndStartPreparation_success_setsEmployeeAndInPreparation_andSaves() {
-        // command validation
+
         doNothing().when(commandValidator).validateEmployeeId(employeeId);
         doNothing().when(commandValidator).validateOrderId(orderId);
 

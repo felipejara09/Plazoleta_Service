@@ -27,6 +27,7 @@ public class OrderUseCase implements IOrderService {
     private final IPinGeneratorPort pinGeneratorPort;
     private final IUserExternalServicePort userExternalServicePort;
     private final IMessagingPort messagingPort;
+    private final OrderDeliverValidator orderDeliverValidator;
 
     private static final EnumSet<OrderStatus> ACTIVE =
             EnumSet.of(OrderStatus.PENDING, OrderStatus.IN_PREPARATION, OrderStatus.READY);
@@ -121,6 +122,33 @@ public class OrderUseCase implements IOrderService {
         return save;
 
     }
+
+    @Override
+    public Order deliverOrder(String token, Long employeeId, Long orderId, String pin) {
+
+        commandValidator.validateEmployeeId(employeeId);
+        commandValidator.validateOrderId(orderId);
+
+        Long employeeRestaurantId = employeeRestaurantPort.getMyRestaurantId(token);
+        restaurantScopeValidator.validateAndGetRestaurantId(employeeRestaurantId);
+
+        Order order = orderPersistencePort.findById(orderId);
+        if (order == null) throw new OrderNotFoundException();
+
+        restaurantScopeValidator.validateOrderBelongsToEmployeeRestaurant(order, employeeRestaurantId);
+
+
+        orderDeliverValidator.validateAssignedEmployee(order, employeeId);
+
+
+        orderDeliverValidator.validateOrderCanBeDelivered(order);
+        orderDeliverValidator.validatePin(order.getSecurityPin(), pin);
+
+        order.setStatus(OrderStatus.DELIVERED);
+
+        return orderPersistencePort.save(order);
+    }
+
 
 
 }

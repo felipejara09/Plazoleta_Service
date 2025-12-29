@@ -9,8 +9,6 @@ import com.pragma.powerup.domain.validation.RestaurantBusinessValidator;
 import com.pragma.powerup.domain.validation.RestaurantDataValidator;
 import lombok.AllArgsConstructor;
 
-import java.util.List;
-
 
 @AllArgsConstructor
 public class RestaurantUseCase implements IRestaurantService {

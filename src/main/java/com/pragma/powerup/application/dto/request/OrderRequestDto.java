@@ -14,5 +14,6 @@ public class OrderRequestDto {
 
     @Valid
     @NotNull
+    @javax.validation.constraints.NotEmpty(message = "Order must contain at least one item")
     private List<OrderItemRequestDto> items;
 }

@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.handler;
 
+import com.pragma.powerup.application.dto.request.DeliverOrderRequestDto;
 import com.pragma.powerup.application.dto.request.OrderRequestDto;
 import com.pragma.powerup.application.dto.response.OrderCreatedResponseDto;
 import com.pragma.powerup.application.dto.response.OrderResponseDto;
@@ -10,4 +11,5 @@ public interface IOrderHandler {
     OrderCreatedResponseDto createOrder(OrderRequestDto request);
     PageModel<OrderResponseDto> listOrdersForEmployeeByStatus(String token, String status, int page, int size);
     OrderResponseDto assignAndStartPreparation(Long orderId);
+    void deliverOrder(Long orderId, DeliverOrderRequestDto dto);
 }

@@ -1,5 +1,6 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
+import com.pragma.powerup.application.dto.request.DeliverOrderRequestDto;
 import com.pragma.powerup.application.dto.request.OrderRequestDto;
 import com.pragma.powerup.application.dto.response.OrderCreatedResponseDto;
 import com.pragma.powerup.application.dto.response.OrderResponseDto;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -62,6 +65,17 @@ public class OrderRestController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PreAuthorize("hasRole('EMPLOYED')")
+    @PatchMapping("/employee/orders/{orderId}/deliver")
+    public ResponseEntity<Void> deliverOrder(
+            @PathVariable Long orderId,
+            @Valid @RequestBody DeliverOrderRequestDto dto
+    ) {
+        orderHandler.deliverOrder(orderId, dto);
+        return ResponseEntity.ok().build();
+    }
+
 
 
 }

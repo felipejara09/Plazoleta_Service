@@ -26,7 +26,7 @@ public class RestaurantRequestDto {
     private String phoneNumber;
 
     @NotNull(message = "User is not an OWNER")
-    private long ownerId;
+    private Long ownerId;
 
     @NotBlank(message = "Logo URL is required")
     private String logoUrl;
