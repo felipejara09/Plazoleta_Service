@@ -7,4 +7,5 @@ public interface IOrderService {
     Order createOrder(Order order);
     PageModel<Order> listOrdersForEmployeeByStatus(String token, String status, int page, int size);
     Order assignToOrderAndStartPreparation(String token, Long employedId, Long orderId);
+    Order markOrderAsReadyAndNotifyClient(String token, Long employedId, Long orderId);
 }

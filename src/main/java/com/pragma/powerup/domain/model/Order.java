@@ -20,4 +20,6 @@ public class Order {
     private List<OrderItem> items;
 
     private Long assignedEmployedId;
+
+    private String securityPin;
 }

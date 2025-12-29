@@ -5,10 +5,7 @@ import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.Order;
 import com.pragma.powerup.domain.model.OrderStatus;
 import com.pragma.powerup.domain.model.PageModel;
-import com.pragma.powerup.domain.spi.IDishPersistencePort;
-import com.pragma.powerup.domain.spi.IEmployeeRestaurantPort;
-import com.pragma.powerup.domain.spi.IOrderPersistencePort;
-import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.domain.spi.*;
 import com.pragma.powerup.domain.validation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +23,10 @@ public class OrderUseCase implements IOrderService {
     private final EmployeeRestaurantScopeValidator restaurantScopeValidator;
     private final OrderCommandValidator commandValidator;
     private final OrderAssignEmployeeValidator assignEmployeeValidator;
+    private final OrderReadyValidator orderReadyValidator;
+    private final IPinGeneratorPort pinGeneratorPort;
+    private final IUserExternalServicePort userExternalServicePort;
+    private final IMessagingPort messagingPort;
 
     private static final EnumSet<OrderStatus> ACTIVE =
             EnumSet.of(OrderStatus.PENDING, OrderStatus.IN_PREPARATION, OrderStatus.READY);
@@ -80,4 +81,46 @@ public class OrderUseCase implements IOrderService {
 
         return orderPersistencePort.save(order);
     }
+
+    @Override
+    public Order markOrderAsReadyAndNotifyClient(String token, Long employedId, Long orderId){
+
+        commandValidator.validateEmployeeId(employedId);
+        commandValidator.validateOrderId(orderId);
+
+        Long employedRestaurantId = employeeRestaurantPort.getMyRestaurantId(token);
+        restaurantScopeValidator.validateAndGetRestaurantId(employedRestaurantId);
+
+        Order order = orderPersistencePort.findById(orderId);
+        if(order == null) throw new OrderNotFoundException();
+
+        restaurantScopeValidator.validateOrderBelongsToEmployeeRestaurant(order, employedRestaurantId);
+
+
+        orderReadyValidator.validate(order, employedId);
+
+
+        String pin = pinGeneratorPort.generatePin();
+        order.setSecurityPin(pin);
+        order.setStatus(OrderStatus.READY);
+
+        Order save = orderPersistencePort.save(order);
+
+
+        String phone = userExternalServicePort.getClientPhoneNumber(token, save.getClientId());
+        if (phone == null || phone.isBlank()) throw new ClientPhoneNotFoundException();
+
+
+        String msg = "Your order is READY. Security PIN: " + pin;
+        try {
+            messagingPort.sendOrderReadySms(token, phone, msg);
+        } catch (Exception e) {
+            throw new SmsNotificationFailedException();
+        }
+
+        return save;
+
+    }
+
+
 }

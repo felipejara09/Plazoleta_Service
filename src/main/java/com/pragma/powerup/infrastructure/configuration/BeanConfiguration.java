@@ -16,6 +16,7 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IDishEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IDishRepository;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantRepository;
+import com.pragma.powerup.infrastructure.out.util.PinGeneratorAdapter;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -140,14 +141,27 @@ public class BeanConfiguration {
             OrderDataValidator dataValidator,
             OrderBusinessValidator businessValidator,
             IEmployeeRestaurantPort employeeRestaurantPort,
-            EmployeeRestaurantScopeValidator restaurantScopeValidator,
             OrderListEmployeeValidator listEmployeeValidator,
+            EmployeeRestaurantScopeValidator restaurantScopeValidator,
             OrderCommandValidator commandValidator,
-            OrderAssignEmployeeValidator assignEmployeeValidator
+            OrderAssignEmployeeValidator assignEmployeeValidator,
+            OrderReadyValidator orderReadyValidator,
+            IPinGeneratorPort pinGeneratorPort,
+            IUserExternalServicePort userExternalServicePort,
+            IMessagingPort messagingPort
     ) {
-        return new OrderUseCase(orderPersistencePort, dataValidator, businessValidator,
-                                employeeRestaurantPort, listEmployeeValidator, restaurantScopeValidator
-        ,                       commandValidator,assignEmployeeValidator);
+        return new OrderUseCase(orderPersistencePort,
+                dataValidator,
+                businessValidator,
+                employeeRestaurantPort,
+                listEmployeeValidator,
+                restaurantScopeValidator,
+                commandValidator,
+                assignEmployeeValidator,
+                orderReadyValidator,
+                pinGeneratorPort,
+                userExternalServicePort,
+                messagingPort);
     }
     @Bean
     public RestTemplate restTemplate() {
@@ -172,6 +186,16 @@ public class BeanConfiguration {
     @Bean
     public EmployeeRestaurantScopeValidator employeeRestaurantScopeValidator() {
         return new EmployeeRestaurantScopeValidator();
+    }
+
+    @Bean
+    public OrderReadyValidator orderReadyValidator() {
+        return new OrderReadyValidator();
+    }
+
+    @Bean
+    public IPinGeneratorPort pinGeneratorPort() {
+        return new PinGeneratorAdapter();
     }
 
 }

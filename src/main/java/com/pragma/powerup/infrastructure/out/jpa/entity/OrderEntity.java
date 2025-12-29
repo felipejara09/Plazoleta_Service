@@ -20,21 +20,20 @@ public class OrderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "restaurant_id", nullable = false)
     private Long restaurantId;
-
     @Column(name = "client_id", nullable = false)
     private Long clientId;
-
     @Column(nullable = false)
     private String status;
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items;
 
     @Column(name = "assigned_employee_id")
     private Long assignedEmployedId;
+
+    @Column(name = "security_pin")
+    private String securityPin;
 }

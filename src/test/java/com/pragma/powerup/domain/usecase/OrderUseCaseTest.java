@@ -68,7 +68,7 @@ class OrderUseCaseTest {
         o.setCreatedAt(null);
         return o;
     }
-    
+
     @Test
     void createOrder_success_setsPendingAndCreatedAt_andSaves() {
         Order draft = createValidOrderDraft();
