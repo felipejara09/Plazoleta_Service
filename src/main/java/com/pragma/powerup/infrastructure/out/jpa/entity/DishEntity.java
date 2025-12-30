@@ -6,12 +6,10 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "dishes")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-
+@NoArgsConstructor
+@AllArgsConstructor
 public class DishEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

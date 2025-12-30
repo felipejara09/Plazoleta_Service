@@ -11,11 +11,10 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "restaurants")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RestaurantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

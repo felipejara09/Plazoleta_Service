@@ -83,4 +83,14 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ExceptionResponse("Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR.toString()));
     }
+
+    @ExceptionHandler(OrderCannotBeCanceledException.class)
+    public ResponseEntity<ExceptionResponse> handleCannotCancel(OrderCannotBeCanceledException ex) {
+        ExceptionResponse response = new ExceptionResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.toString()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
 }

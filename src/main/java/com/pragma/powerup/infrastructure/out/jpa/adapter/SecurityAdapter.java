@@ -19,4 +19,11 @@ public class SecurityAdapter implements ISecurityPort {
         return principal.getUserId();
 
     }
+
+    @Override
+    public String getToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        AuthPrincipal principal = (AuthPrincipal) authentication.getPrincipal();
+        return principal.getToken();
+    }
 }

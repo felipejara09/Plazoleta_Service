@@ -9,4 +9,6 @@ public interface IOrderService {
     Order assignToOrderAndStartPreparation(String token, Long employedId, Long orderId);
     Order markOrderAsReadyAndNotifyClient(String token, Long employedId, Long orderId);
     Order deliverOrder(String token, Long employeeId, Long orderId, String pin);
+    Order cancelOrder(Long clientId, Long orderId);
+
 }

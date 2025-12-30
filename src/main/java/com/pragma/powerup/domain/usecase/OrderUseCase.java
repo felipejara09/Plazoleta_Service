@@ -28,6 +28,7 @@ public class OrderUseCase implements IOrderService {
     private final IUserExternalServicePort userExternalServicePort;
     private final IMessagingPort messagingPort;
     private final OrderDeliverValidator orderDeliverValidator;
+    private final OrderCancelValidator orderCancelValidator;
 
     private static final EnumSet<OrderStatus> ACTIVE =
             EnumSet.of(OrderStatus.PENDING, OrderStatus.IN_PREPARATION, OrderStatus.READY);
@@ -148,6 +149,23 @@ public class OrderUseCase implements IOrderService {
 
         return orderPersistencePort.save(order);
     }
+
+    @Override
+    public Order cancelOrder(Long clientId, Long orderId) {
+
+        commandValidator.validateEmployeeId(clientId);
+        commandValidator.validateOrderId(orderId);
+
+        Order order = orderPersistencePort.findById(orderId);
+        if (order == null) throw new OrderNotFoundException();
+
+        orderCancelValidator.validateOwnership(order, clientId);
+        orderCancelValidator.validateCanCancel(order);
+
+        order.setStatus(OrderStatus.CANCELED);
+        return orderPersistencePort.save(order);
+    }
+
 
 
 

@@ -77,6 +77,14 @@ public class OrderRestController {
     }
 
 
+    @PreAuthorize("hasRole('CLIENT')")
+    @PatchMapping("/client/orders/{orderId}/cancel")
+    public ResponseEntity<Void> cancel(@PathVariable Long orderId) {
+        orderHandler.cancelOrder(orderId);
+        return ResponseEntity.ok().build();
+    }
+
+
 
 }
 

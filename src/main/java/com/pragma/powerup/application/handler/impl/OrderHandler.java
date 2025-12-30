@@ -55,8 +55,8 @@ public class OrderHandler implements IOrderHandler {
     @Override
     public OrderResponseDto assignAndStartPreparation(Long orderId) {
 
-        String token = SecurityUtils.getToken();
-        Long employeeId = SecurityUtils.getUserId();
+        String token = securityPort.getToken();
+        Long employeeId = securityPort.getAuthenticatedUserId();
 
         return mapper.toResponse(
                 orderService.assignToOrderAndStartPreparation(token, employeeId, orderId)
@@ -65,8 +65,15 @@ public class OrderHandler implements IOrderHandler {
 
     @Override
     public void deliverOrder(Long orderId, DeliverOrderRequestDto dto) {
-        String token = SecurityUtils.getToken();
-        Long employeeId = SecurityUtils.getUserId();
+        String token = securityPort.getToken();
+        Long employeeId = securityPort.getAuthenticatedUserId();
         orderService.deliverOrder(token, employeeId, orderId, dto.getPin());
     }
+
+    @Override
+    public void cancelOrder(Long orderId) {
+        Long clientId = securityPort.getAuthenticatedUserId();
+        orderService.cancelOrder(clientId, orderId);
+    }
+
 }

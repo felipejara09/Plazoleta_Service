@@ -12,4 +12,6 @@ public interface IOrderHandler {
     PageModel<OrderResponseDto> listOrdersForEmployeeByStatus(String token, String status, int page, int size);
     OrderResponseDto assignAndStartPreparation(Long orderId);
     void deliverOrder(Long orderId, DeliverOrderRequestDto dto);
+    void cancelOrder(Long orderId);
+
 }
