@@ -4,6 +4,7 @@ public final class ValidationConstants {
 
     private ValidationConstants() {}
 
+    public static final String STATUS_INIT = "CREATED";
     public static final String PHONE_REGEX = "^\\+?\\d{10,13}$";
     public static final String ONLY_NUMBER_REGEX   = "^\\d+$";
     public static final String URL_REGEX = "^(https?://)([\\w.-]+)(:[0-9]{1,5})?(/.*)?$";

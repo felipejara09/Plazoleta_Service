@@ -150,7 +150,8 @@ public class BeanConfiguration {
             IUserExternalServicePort userExternalServicePort,
             IMessagingPort messagingPort,
             OrderDeliverValidator orderDeliverValidator,
-            OrderCancelValidator orderCancelValidator
+            OrderCancelValidator orderCancelValidator,
+            ITraceabilityPort traceabilityPort
     ) {
         return new OrderUseCase(orderPersistencePort,
                 dataValidator,
@@ -165,7 +166,8 @@ public class BeanConfiguration {
                 userExternalServicePort,
                 messagingPort,
                 orderDeliverValidator,
-                orderCancelValidator);
+                orderCancelValidator,
+                traceabilityPort);
     }
     @Bean
     public RestTemplate restTemplate() {

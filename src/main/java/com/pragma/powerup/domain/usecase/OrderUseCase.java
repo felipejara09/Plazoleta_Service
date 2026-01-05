@@ -6,6 +6,8 @@ import com.pragma.powerup.domain.model.Order;
 import com.pragma.powerup.domain.model.OrderStatus;
 import com.pragma.powerup.domain.model.PageModel;
 import com.pragma.powerup.domain.spi.*;
+import com.pragma.powerup.domain.util.RoleConstants;
+import com.pragma.powerup.domain.util.ValidationConstants;
 import com.pragma.powerup.domain.validation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -29,9 +31,8 @@ public class OrderUseCase implements IOrderService {
     private final IMessagingPort messagingPort;
     private final OrderDeliverValidator orderDeliverValidator;
     private final OrderCancelValidator orderCancelValidator;
+    private final ITraceabilityPort traceabilityPort;
 
-    private static final EnumSet<OrderStatus> ACTIVE =
-            EnumSet.of(OrderStatus.PENDING, OrderStatus.IN_PREPARATION, OrderStatus.READY);
 
     @Override
     public Order createOrder(Order order) {
@@ -45,7 +46,20 @@ public class OrderUseCase implements IOrderService {
         order.setStatus(OrderStatus.PENDING);
         order.setCreatedAt(LocalDateTime.now());
 
-        return orderPersistencePort.save(order);
+        Order saved = orderPersistencePort.save(order);
+
+        traceabilityPort.registerStatusChange(
+                null,
+                saved.getId(),
+                saved.getClientId(),
+                saved.getRestaurantId(),
+                ValidationConstants.STATUS_INIT,
+                OrderStatus.PENDING.name(),
+                saved.getClientId(),
+                RoleConstants.ROLE_CLIENT
+        );
+
+        return saved;
     }
 
     @Override
@@ -78,10 +92,25 @@ public class OrderUseCase implements IOrderService {
         assignEmployeeValidator.validateOrderIsPending(order);
         assignEmployeeValidator.validateNotAssignedToAnotherEmployee(order, employeeId);
 
+        String previous = order.getStatus().name();
+
         order.setAssignedEmployedId(employeeId);
         order.setStatus(OrderStatus.IN_PREPARATION);
 
-        return orderPersistencePort.save(order);
+        Order saved = orderPersistencePort.save(order);
+
+        traceabilityPort.registerStatusChange(
+                token,
+                saved.getId(),
+                saved.getClientId(),
+                saved.getRestaurantId(),
+                previous,
+                OrderStatus.IN_PREPARATION.name(),
+                employeeId,
+                RoleConstants.ROLE_EMPLOYED
+        );
+
+        return saved;
     }
 
     @Override
@@ -101,15 +130,26 @@ public class OrderUseCase implements IOrderService {
 
         orderReadyValidator.validate(order, employedId);
 
+        String previous = order.getStatus().name();
 
         String pin = pinGeneratorPort.generatePin();
         order.setSecurityPin(pin);
         order.setStatus(OrderStatus.READY);
 
-        Order save = orderPersistencePort.save(order);
+        Order saved = orderPersistencePort.save(order);
 
+        traceabilityPort.registerStatusChange(
+                token,
+                saved.getId(),
+                saved.getClientId(),
+                saved.getRestaurantId(),
+                previous,
+                OrderStatus.READY.name(),
+                employedId,
+                RoleConstants.ROLE_EMPLOYED
+        );
 
-        String phone = userExternalServicePort.getClientPhoneNumber(token, save.getClientId());
+        String phone = userExternalServicePort.getClientPhoneNumber(token, saved.getClientId());
         if (phone == null || phone.isBlank()) throw new ClientPhoneNotFoundException();
 
 
@@ -120,7 +160,7 @@ public class OrderUseCase implements IOrderService {
             throw new SmsNotificationFailedException();
         }
 
-        return save;
+        return saved;
 
     }
 
@@ -145,9 +185,24 @@ public class OrderUseCase implements IOrderService {
         orderDeliverValidator.validateOrderCanBeDelivered(order);
         orderDeliverValidator.validatePin(order.getSecurityPin(), pin);
 
+        String previous = order.getStatus().name();
+
         order.setStatus(OrderStatus.DELIVERED);
 
-        return orderPersistencePort.save(order);
+        Order saved = orderPersistencePort.save(order);
+
+        traceabilityPort.registerStatusChange(
+                token,
+                saved.getId(),
+                saved.getClientId(),
+                saved.getRestaurantId(),
+                previous,
+                OrderStatus.DELIVERED.name(),
+                employeeId,
+                RoleConstants.ROLE_EMPLOYED
+        );
+
+        return saved;
     }
 
     @Override
@@ -162,8 +217,25 @@ public class OrderUseCase implements IOrderService {
         orderCancelValidator.validateOwnership(order, clientId);
         orderCancelValidator.validateCanCancel(order);
 
+        String previous = order.getStatus().name();
+
         order.setStatus(OrderStatus.CANCELED);
-        return orderPersistencePort.save(order);
+
+        Order saved = orderPersistencePort.save(order);
+
+
+        traceabilityPort.registerStatusChange(
+                null,
+                saved.getId(),
+                saved.getClientId(),
+                saved.getRestaurantId(),
+                previous,
+                OrderStatus.CANCELED.name(),
+                clientId,
+                RoleConstants.ROLE_CLIENT
+        );
+
+        return saved;
     }
 
 

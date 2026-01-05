@@ -28,15 +28,27 @@ public class DishRestController {
     private final IDishHandler dishHandler;
 
     @Operation(
-            summary = "Crear plato",
-            description = "Permite al propietario de un restaurante crear platos asociados a su restaurante."
+            summary = "Create dish",
+            description = "Allows a restaurant owner to create a new dish associated with their restaurant."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Plato creado correctamente",
-                    content = @Content(schema = @Schema(implementation = DishResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Dish created successfully",
+                    content = @Content(schema = @Schema(implementation = DishResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or business rules violated",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied. Only restaurant owners can create dishes",
+                    content = @Content
+            )
     })
+
     @PreAuthorize("hasRole('OWNER')")
     @PostMapping("/owner/dishes")
     public ResponseEntity<Void> createDish(@Validated @RequestBody DishRequestDto dishRequestDto) {
@@ -44,15 +56,27 @@ public class DishRestController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     @Operation(
-            summary = "Actualizar plato",
-            description = "Permite al propietario de un restaurante Actualizar precio y descripcion del plato."
+            summary = "Update dish",
+            description = "Allows a restaurant owner to update the price and description of an existing dish."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Plato actualizado correctamente",
-                    content = @Content(schema = @Schema(implementation = DishResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Dish updated successfully",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or business rules violated",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied. Only restaurant owners can update dishes",
+                    content = @Content
+            )
     })
+
     @PreAuthorize("hasRole('OWNER')")
     @PatchMapping("/owner/dishes/update/{id}")
     public ResponseEntity<Void> updateDish(@PathVariable Long id,
@@ -62,15 +86,27 @@ public class DishRestController {
     }
 
     @Operation(
-            summary = "Actualizar estatus de plato",
-            description = "Permite al propietario de un restaurante active y desactive un plato."
+            summary = "Change dish availability status",
+            description = "Allows a restaurant owner to activate or deactivate a dish."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Plato actualizado correctamente",
-                    content = @Content(schema = @Schema(implementation = DishResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Dish status updated successfully",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Dish not found or invalid status value",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied. Only restaurant owners can change dish status",
+                    content = @Content
+            )
     })
+
 
     @PreAuthorize("hasRole('OWNER')")
     @PatchMapping("owner/dishes/{dishId}/status")
@@ -79,6 +115,28 @@ public class DishRestController {
         dishHandler.changeDishStatus(dishId, active);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(
+            summary = "List restaurant menu",
+            description = "Allows a client to view the active dishes of a restaurant with pagination and optional category filtering."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Restaurant menu retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = PageResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Restaurant not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied. Only clients can access restaurant menus",
+                    content = @Content
+            )
+    })
 
 
     @PreAuthorize("hasRole('CLIENT')")

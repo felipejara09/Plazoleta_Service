@@ -29,15 +29,27 @@ public class RestaurantRestController {
     private final IRestaurantOwnershipHandler ownershipHandler;
 
     @Operation(
-            summary = "Crear restaurante",
-            description = "Permite al administrador registrar un restaurante con su propietario."
+            summary = "Create restaurant",
+            description = "Allows an administrator to register a restaurant and assign its owner."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Restaurante creado correctamente",
-                    content = @Content(schema = @Schema(implementation = RestaurantResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos o reglas de negocio incumplidas",
-                    content = @Content)
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Restaurant created successfully",
+                    content = @Content(schema = @Schema(implementation = RestaurantResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or business rules violated",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied. Only administrators can create restaurants",
+                    content = @Content
+            )
     })
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/restaurants")
@@ -52,6 +64,23 @@ public class RestaurantRestController {
     public ResponseEntity<Boolean> ownership(@PathVariable Long restaurantId) {
         return ResponseEntity.ok(ownershipHandler.checkOwnership(restaurantId));
     }
+
+    @Operation(
+            summary = "List restaurants",
+            description = "Allows a client to list available restaurants with pagination."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Restaurants retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = PageResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Access denied. Only clients can list restaurants",
+                    content = @Content
+            )
+    })
 
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("client/restaurants")
